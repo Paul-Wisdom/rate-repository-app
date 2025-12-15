@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native"
 import RepositoryList from "./RepositoryList";
+import Constants from 'expo-constants'
 import Text from "./Text";
 import AppBar from "./AppBar";
 import theme from "../theme";
@@ -10,7 +11,8 @@ const styles = StyleSheet.create({
     container:{
         flexGrow: 1,
         flexShrink: 1,
-        backgroundColor: theme.background.mainBackgroundColor
+        backgroundColor: theme.background.mainBackgroundColor,
+        marginTop: Constants.statusBarHeight
     }
 })
 
