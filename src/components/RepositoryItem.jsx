@@ -35,7 +35,9 @@ const RepositoryItem = ({ repository }) => {
     return (
         <View style={styles.container}>
             <View style={styles.repoInfoContainer}>
-                <Image style={styles.avatar} source={{ uri: repository.ownerAvatarUrl }} />
+                <View style={{padding: 5}}>
+                    <Image style={styles.avatar} source={{ uri: repository.ownerAvatarUrl }} />
+                </View>
                 <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
                     <Text fontWeight={'bold'}>{repository.fullName}</Text>
                     <Text color={'textSecondary'}>{repository.description}</Text>
