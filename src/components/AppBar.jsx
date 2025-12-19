@@ -2,6 +2,8 @@ import { ScrollView, StyleSheet, View } from "react-native"
 import Text from "./Text"
 import theme from "../theme"
 import { Link } from "react-router-native"
+import useloggedInUser from "../hooks/useLoggedInUser"
+import SignOut from "./SignOut"
 
 const styles = StyleSheet.create({
     container: {
@@ -15,10 +17,15 @@ const AppBarTab = ({ tabName, route }) => {
     return <Link to={route}><Text style={{ color: 'white', marginLeft: 7, marginBottom: 5 }}>{tabName}</Text></Link>
 }
 const AppBar = () => {
+    const {data} = useloggedInUser();
+    console.log(data);
+    const user = data? data.me : null
+    
+
     return <View style={styles.container}>
         <ScrollView horizontal>
             <AppBarTab tabName={'Repositories'} route={'/'} />
-            <AppBarTab tabName={'Sign In'} route={'/sign-in'} />
+            {!user? <AppBarTab tabName={'Sign In'} route={'/sign-in'} />: <SignOut />}
         </ScrollView>
     </View>
 }

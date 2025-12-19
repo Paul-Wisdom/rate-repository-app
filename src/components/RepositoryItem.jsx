@@ -40,7 +40,7 @@ const RepositoryItem = ({ repository }) => {
                 </View>
                 <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
                     <Text fontWeight={'bold'}>{repository.fullName}</Text>
-                    <Text color={'textSecondary'}>{repository.description}</Text>
+                    <Text color={'textSecondary'} style={{marginRight: 50}}>{repository.description}</Text>
                     <Text style={{ backgroundColor: theme.colors.primary, color: 'white', borderRadius: 3, paddingVertical: 2, paddingHorizontal: 5, marginVertical: 8 }}>{repository.language}</Text>
                 </View>
             </View>

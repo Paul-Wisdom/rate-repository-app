@@ -3,6 +3,8 @@ import Text from "./Text"
 import { useFormik } from "formik"
 import * as yup from 'yup'
 import theme from "../theme"
+import useSignIn from "../hooks/useSignIn"
+import { useNavigate } from "react-router-native"
 
 const validationSchema = yup.object().shape({
     username: yup.string().required('Username is required'),
@@ -10,8 +12,19 @@ const validationSchema = yup.object().shape({
 })
 
 const SignIn = () => {
-    const onSubmit = (values) => {
-        console.log(values)
+    const { signIn, error } = useSignIn()
+    const navigate = useNavigate()
+
+    const onSubmit = async ({ username, password }) => {
+        console.log(username, password);
+
+        try {
+            await signIn({ username, password })
+
+            navigate('/');
+        } catch (e) {
+            console.log(e);
+        }
     }
     const initialValues = {
         username: '',
@@ -54,13 +67,14 @@ const SignIn = () => {
 
     return (
         <View style={styles.formContainer}>
+            {error && <Text style={{ color: theme.error.primary, marginTop: 5 }}>{error}</Text>}
             <View style={{ flexDirection: 'column', alignItems: 'flex-start', width: '80%' }}>
                 <TextInput style={!formik.errors.username ? styles.input : { ...styles.input, borderColor: theme.error.primary }} placeholder="Username" value={formik.values.username} onChangeText={formik.handleChange('username')} />
-                {formik.touched.username && formik.errors.username && <Text style={{ color: 'red' }}>{formik.errors.username}</Text>}
+                {formik.touched.username && formik.errors.username && <Text style={{ color: theme.error.primary }}>{formik.errors.username}</Text>}
             </View>
             <View style={{ flexDirection: 'column', alignItems: 'flex-start', width: '80%' }}>
                 <TextInput style={!formik.errors.password ? styles.input : { ...styles.input, borderColor: theme.error.primary }} placeholder="Password" secureTextEntry value={formik.values.password} onChangeText={formik.handleChange('password')} />
-                {formik.touched.password && formik.errors.password && <Text style={{ color: 'red', marginLeft: 0 }}>{formik.errors.password}</Text>}
+                {formik.touched.password && formik.errors.password && <Text style={{ color: theme.error.primary, marginLeft: 0 }}>{formik.errors.password}</Text>}
             </View>
             <Pressable onPress={() => formik.handleSubmit()} style={styles.button}><Text style={{ color: 'white' }}>Sign In</Text></Pressable>
         </View>
