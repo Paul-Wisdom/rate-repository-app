@@ -1,8 +1,13 @@
-import { FlatList, View, StyleSheet } from 'react-native';
+import { FlatList, View, StyleSheet, Pressable, TextInput } from 'react-native';
 import RepositoryItem from './RepositoryItem';
 import useRepositories from '../hooks/useRepositories';
 import Text from './Text';
 import theme from '../theme';
+import { useNavigate } from 'react-router-native';
+import { Picker } from '@react-native-picker/picker';
+import { useDebouncedCallback } from 'use-debounce'
+import React, { useContext, useState } from 'react';
+import RepositoriesSortContext from '../context/RepositoriesSort';
 
 const styles = StyleSheet.create({
   separator: {
@@ -57,22 +62,126 @@ const styles = StyleSheet.create({
 //   },
 // ];
 
-const ItemSeparator = () => <View style={styles.separator} />;
+const Menu = React.memo(() => {
+  const style = StyleSheet.create({
+    input: {
+      borderColor: theme.colors.textSecondary,
+      borderRadius: 2,
+      width: '100%',
+      marginTop: 2,
+      borderWidth: 2,
+      color: theme.colors.textSecondary,
+      paddingLeft: 10
+    },
+  })
+  const [setOrderBy, setOrderDirection, setSearchKeyword, searchKeyword] = useContext(RepositoriesSortContext);
+  const [sort, setSort] = useState('latest');
+  const debounced = useDebouncedCallback((value) => {
+    console.log(value)
+    setSearchKeyword(value)
+  }, 500)
+  const handleChange = (itemValue, itemIndex) => {
+    switch (itemValue) {
+      case 'latest':
+        setSort('latest')
+        setOrderBy('CREATED_AT')
+        setOrderDirection('DESC')
+        break;
+      case 'highest':
+        setSort('highest')
+        setOrderBy('RATING_AVERAGE')
+        setOrderDirection('DESC')
+        break;
+      case 'lowest':
+        setSort('lowest')
+        setOrderBy('RATING_AVERAGE')
+        setOrderDirection('ASC')
+        break;
+    }
+  }
+
+  return (
+    <View style={{ backgroundColor: 'white', padding: 10 }}>
+      <TextInput style={style.input} placeholder='Search' value={searchKeyword} onChangeText={debounced} />
+      <Text>sort by:</Text>
+      <Picker onValueChange={handleChange} selectedValue={sort}>
+        <Picker.Item label='latest' value={'latest'} />
+        <Picker.Item label='highest rated' value={'highest'} />
+        <Picker.Item label='lowest rated' value={'lowest'} />
+      </Picker>
+    </View>
+  )
+})
+
+export const ItemSeparator = () => <View style={styles.separator} />;
+
+// export class RepositoryListContainer extends React.Component {
+
+//   renderHeader = () => {
+//     return (
+//       <Menu />
+//     );
+//   };
+
+//   render() {
+//     const { repositories, navigate, onEndReached } = this.props;
+//     const repositoriesNodes = repositories ? repositories.edges.map(r => r.node) : []
+
+//     return (
+//       <FlatList
+//         data={repositoriesNodes}
+//         ItemSeparatorComponent={ItemSeparator}
+//         renderItem={(repository) => <Pressable onPress={() => navigate(`/repositories/${repository.item.id}`)}><RepositoryItem repository={repository.item} /></Pressable>}
+//         keyExtractor={r => r.id}
+//         ListHeaderComponent={this.renderHeader}
+//         onEndReached={onEndReached}
+//         onEndReachedThreshold={0.5}
+//       />
+//     );
+//   }
+// }
+
+export const RepositoryListContainer = ({ repositories, onEndReached }) => {
+  const repositoriesNodes = repositories ? repositories.edges.map(r => r.node) : []
+  const navigate = useNavigate()
+
+  return (
+    <FlatList
+      data={repositoriesNodes}
+      ItemSeparatorComponent={ItemSeparator}
+      renderItem={(repository) => <Pressable onPress={() => navigate(`/repositories/${repository.item.id}`)}><RepositoryItem repository={repository.item} /></Pressable>}
+      keyExtractor={r => r.id}
+      onEndReached={onEndReached}
+      onEndReachedThreshold={0.5}
+      ListHeaderComponent={<Menu />}
+    />
+  )
+
+
+}
 
 const RepositoryList = () => {
-  const { data, error, loading } = useRepositories()
-  const repositories = data? data.repositories.edges.map(r => r.node) : []
+  const [orderBy, setOrderBy] = useState('CREATED_AT');
+  const [orderDirection, setorderDirection] = useState('DESC')
+  const [searchKeyword, setSearchKeyword] = useState('')
+
+  const navigate = useNavigate()
+
+  const { data, error, loading, fetchMore } = useRepositories({ orderBy, orderDirection, searchKeyword, first: 10 })
+  const repositories = data ? data.repositories : null
+
+  const onEndReached = async () => {
+    await fetchMore()
+  }
 
 
   return (<>
-    {error && <Text style={{color: theme.error.primary}}>{error.message}</Text>}
+    {error && <Text style={{ color: theme.error.primary }}>{error.message}</Text>}
     {loading && <Text>loading ...</Text>}
-    {data && <FlatList
-      data={repositories}
-      ItemSeparatorComponent={ItemSeparator}
-      renderItem={(repository) => <RepositoryItem repository={repository.item} />}
-      keyExtractor={r => r.id}
-    />}
+    {data && <RepositoriesSortContext.Provider value={[setOrderBy, setorderDirection, setSearchKeyword, searchKeyword]}>
+      <RepositoryListContainer repositories={repositories} onEndReached={onEndReached} navigate={navigate}/>
+    </RepositoriesSortContext.Provider>
+    }
   </>
   );
 };

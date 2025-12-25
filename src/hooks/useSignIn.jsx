@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AUTHENTICATE } from "../graphql/mutations";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import useAuthStorageContext from "./useAuthStorageContext";
+import { ME } from "../graphql/queries";
 
 const useSignIn = () => {
     const [error, setError] = useState(null);
@@ -15,7 +16,8 @@ const useSignIn = () => {
             setTimeout(() => {
                 setError(null);
             }, 5000)
-        }
+        },
+        refetchQueries: [ME]
     });
 
     const signIn = async ({username, password}) => {

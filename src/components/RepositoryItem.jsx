@@ -1,4 +1,5 @@
-import { Image, StyleSheet, View } from "react-native"
+import { Image, Pressable, StyleSheet, View } from "react-native"
+import * as Linking from 'expo-linking';
 import Text from "./Text";
 import theme from "../theme";
 
@@ -31,11 +32,11 @@ const Stats = ({ name, value }) => {
         </View>
     )
 }
-const RepositoryItem = ({ repository }) => {
+const RepositoryItem = ({ repository, singleRepositoryPage }) => {
     return (
-        <View style={styles.container}>
+        <View style={singleRepositoryPage? {...styles.container, marginBottom: 7}: styles.container } testID="repositoryItem">
             <View style={styles.repoInfoContainer}>
-                <View style={{padding: 5}}>
+                <View style={{paddingRight: 10, paddingLeft: 0}}>
                     <Image style={styles.avatar} source={{ uri: repository.ownerAvatarUrl }} />
                 </View>
                 <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
@@ -50,6 +51,7 @@ const RepositoryItem = ({ repository }) => {
                 <Stats name={'Reviews'} value={repository.reviewCount} />
                 <Stats name={'Rating'} value={repository.ratingAverage} />
             </View>
+            {singleRepositoryPage && <View style={{backgroundColor: theme.colors.primary, marginTop: 3, borderRadius: 2}}><Pressable onPress={() => Linking.openURL(repository.url)}><Text style={{color: 'white', paddingVertical: 8, textAlign: 'center'}}>Open in Github</Text></Pressable></View>}
         </View>
     )
 }

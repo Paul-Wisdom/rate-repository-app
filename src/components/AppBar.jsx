@@ -25,7 +25,10 @@ const AppBar = () => {
     return <View style={styles.container}>
         <ScrollView horizontal>
             <AppBarTab tabName={'Repositories'} route={'/'} />
+             {user && <AppBarTab tabName={'Create a review'} route={'/review'}/>}
+             {user && <AppBarTab tabName={'My reviews'} route={'/reviews'}/>}
             {!user? <AppBarTab tabName={'Sign In'} route={'/sign-in'} />: <SignOut />}
+            {!user && <AppBarTab tabName={'Sign up'} route={'/sign-up'}/>}
         </ScrollView>
     </View>
 }
